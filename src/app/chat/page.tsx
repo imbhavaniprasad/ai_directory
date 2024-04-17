@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSession } from "next-auth/react";
 interface Message {
   text: string;
@@ -8,74 +8,89 @@ interface Message {
 }
 const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState<string>('');
+  const [accessToken,setAccessToken] = useState<string|null>(null);
   const { data: session } = useSession();
+  useEffect(()=>{
+    const fetchAccessToken = async () => {
+      try {
+        const response = await fetch('https://scaip.symphonysummit.com/api/access-token');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setAccessToken(data);
+      } catch (error) {
+        console.error('Error:', error);
+      } 
+    }
+    fetchAccessToken()
+  },[])
   //if (!session || !session.user) return <div className="text-red-500 p-5">You Need To Sign In</div>;
   const handleSearchTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(event.target.value);
   };
-  const addMessage = () => {
-    if(searchText.trim() === '') return;
-    // User message
-    const newMessage = { text: searchText, type: 'user', timestamp: new Date() };
-    setMessages(prevMessages => [...prevMessages, newMessage]);
-
-    // Bot response
-    const botResponse = generateBotResponse();
-    const botMessage = { text: botResponse, type: 'bot', timestamp: new Date() };
-    setMessages(prevMessages => [...prevMessages, botMessage]);
-
-    setSearchText('');
-  };
-  let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InJhdmlkYXR0YS5oc0BzeW1waG9ueXN1bW1pdC5jb20iLCJuYW1lIjoiUmF2aWRhdHRhIEhTIiwidXNlcklkIjoiYWRtaW4iLCJleHAiOjE3MTE1NDQwNTl9.Tg70IpHsuYiYV6tWKoOwhudM3QjpCXrfeRuQFBggP_c'
-  // const addMessage = async () => {
+  // const addMessage = () => {
   //   if(searchText.trim() === '') return;
-  
   //   // User message
   //   const newMessage = { text: searchText, type: 'user', timestamp: new Date() };
   //   setMessages(prevMessages => [...prevMessages, newMessage]);
-  // try{
-  //   // Send API request
-  //   const response = await fetch('https://scaip.symphonysummit.com/api/converse', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'Authorization': `Bearer ${token}`, // replace with your token
-  //     },
-  //     body: JSON.stringify({
-  //       user_input: searchText,
-  //       session_id: "5ab5e633-043c-4403-8b17-4dbc826f59019",
-  //       correlation_id: "35954621311811312",
-  //       task_type: null
-  //     }),
-  //   });
-  //   if (!response.ok) {
-  //     throw new Error(`HTTP error! status: ${response.status}`);
-  //   }
 
-  //   const data = await response.json();
-  
   //   // Bot response
-  //   const botMessage = { text: data.message_out, type: 'bot', timestamp: new Date() }; // replace 'data.message' with the actual path to the message in the response
+  //   const botResponse = generateBotResponse();
+  //   const botMessage = { text: botResponse, type: 'bot', timestamp: new Date() };
   //   setMessages(prevMessages => [...prevMessages, botMessage]);
-  // } catch (error) {
-  //   console.error('Error:', error);
-  // }
+
   //   setSearchText('');
   // };
-  const generateBotResponse = () => {
-    // This function generates a random response from the bot
-    const responses = [
-      "Hello there!",
-      "How can I assist you?",
-      "That's interesting!",
-      "I'm here to help.",
-      "Tell me more!"
-    ];
-    const randomIndex = Math.floor(Math.random() * responses.length);
-    return responses[randomIndex];
-  };
+  // let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InJhdmlkYXR0YS5oc0BzeW1waG9ueXN1bW1pdC5jb20iLCJuYW1lIjoiUmF2aWRhdHRhIEhTIiwidXNlcklkIjoiYWRtaW4iLCJleHAiOjE3MTM0NDMzMDN9.ptAYdSQP8oJmBGLBZSbZ7h-XMGpFq7YrptRQXPAmr_A'
+  const addMessage = async () => {
+    if(searchText.trim() === '') return;
+    setSearchText('');
+    // User message
+    const newMessage = { text: searchText, type: 'user', timestamp: new Date() };
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+  try{
+    // Send API request
+    const response = await fetch('https://scaip.symphonysummit.com/api/converse', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`, // replace with your token
+      },
+      body: JSON.stringify({
+        user_input: searchText,
+        session_id: "5ab5e633-043c-4403-8b17-4dbc826f59019",
+        correlation_id: "35954621311811312",
+        task_type: null
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
+    const data = await response.json();
+  
+    // Bot response
+    const botMessage = { text: data.message_out, type: 'bot', timestamp: new Date() }; // replace 'data.message' with the actual path to the message in the response
+    setMessages(prevMessages => [...prevMessages, botMessage]);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+  };
+  // const generateBotResponse = () => {
+  //   // This function generates a random response from the bot
+  //   const responses = [
+  //     "Hello there!",
+  //     "How can I assist you?",
+  //     "That's interesting!",
+  //     "I'm here to help.",
+  //     "Tell me more!"
+  //   ];
+  //   const randomIndex = Math.floor(Math.random() * responses.length);
+  //   return responses[randomIndex];
+  // };
+if(!accessToken) return <div>Generating Token for the Session</div>
   return (
     <div className='flex flex-col h-[calc(100vh-40px)]'>
       <div className='flex-1 overflow-y-auto p-4 w-[80%] mx-auto justify-center'>
