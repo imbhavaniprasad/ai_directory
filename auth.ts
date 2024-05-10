@@ -17,7 +17,7 @@ const credentialsConfig = CredentialsProvider({
   async authorize(credentials) {
     if (credentials.username === "testuser@gmail.com" && credentials.password === "test@123")
       return {
-        name: "Bhavani Prasad",
+        name: "Test User",
       };
     else return null;
   },
