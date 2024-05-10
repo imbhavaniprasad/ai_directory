@@ -1,6 +1,8 @@
 "use client"
 import React, { useEffect, useState } from 'react'
+import { BsFillFileEarmarkSpreadsheetFill } from "react-icons/bs";
 import { useSession } from "next-auth/react";
+import { IoChatbubbleOutline } from "react-icons/io5";
 interface Message {
   text: string;
   timestamp: Date;
@@ -43,7 +45,7 @@ const Chat = () => {
 
   //   setSearchText('');
   // };
-  // let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InJhdmlkYXR0YS5oc0BzeW1waG9ueXN1bW1pdC5jb20iLCJuYW1lIjoiUmF2aWRhdHRhIEhTIiwidXNlcklkIjoiYWRtaW4iLCJleHAiOjE3MTM0NDMzMDN9.ptAYdSQP8oJmBGLBZSbZ7h-XMGpFq7YrptRQXPAmr_A'
+  
   const addMessage = async () => {
     if(searchText.trim() === '') return;
     setSearchText('');
@@ -81,25 +83,44 @@ const Chat = () => {
   // const generateBotResponse = () => {
   //   // This function generates a random response from the bot
   //   const responses = [
-  //     "Hello there!",
-  //     "How can I assist you?",
-  //     "That's interesting!",
-  //     "I'm here to help.",
-  //     "Tell me more!"
+  //     // "Hello there!",
+  //     // "How can I assist you?",
+  //     // "That's interesting!",
+  //     // "I'm here to help.",
+  //     // "Tell me more!",
+  //     "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptatibus laborum fugit nisi ut totam ducimus? Hic cumque ad odio nesciunt quasi, voluptate, adipisci molestias at corporis error veniam tenetur nemo.",
   //   ];
   //   const randomIndex = Math.floor(Math.random() * responses.length);
   //   return responses[randomIndex];
   // };
 if(!accessToken) return <div>Generating Token for the Session</div>
   return (
-    <div className='flex flex-col h-[calc(100vh-40px)]'>
-      <div className='flex-1 overflow-y-auto p-4 w-[80%] mx-auto justify-center'>
+    <div className='flex flex-col h-[calc(100vh-40px)] bg-slate-100'>
+      <div className='flex-1 overflow-y-auto scrollbar-hide p-4 w-[80%] mx-auto justify-center'>
         {messages.map((message, index) => (
-         <div key={index} className={`${message.type == 'user' ? "text-right" : "text-left"}`}>
-         <p className={`mb-1 ${message.type === 'user' ? 'text-blue-500' : 'text-green-500'} border border-white shadow-lg bg-white rounded-md p-2 inline-block`}>
-           {message.type === 'user' ? 'You' : 'Bot'}: {message.text}
+         <div key={index} className={`${message.type == 'user' ? "text-right" : "text-left"} relative`}>
+         <p className={`mb-1 ${message.type === 'user' ? ' rounded-t-full rounded-bl-full' : 'rounded-2xl mt-2'} text-black border border-white shadow-lg bg-white  p-5 inline-block`}>
+         {message.type !== 'user' && <span className='absolute top-2 text-sm text-[blue]'>Assistant</span>} {message.text}
          </p>
-         <div><p className='text-[10px]'>{message.timestamp.toLocaleString()}</p></div>
+         {/* <div><p className='text-[10px]'>{message.timestamp.toLocaleString()}</p></div> */}
+         {message.type!== "user" && <div className='flex gap-2'>
+      
+          {/* <IoChatbubbleOutline /> */}
+          <input 
+  className="pl-2 placeholder-blue-500 text-[blue] focus:outline-[blue] rounded-tl-full rounded-br-full rounded-tr-full min-w-[5ch] max-w-full overflow-visible" 
+  type="text" 
+  placeholder="Ask a follow up question..."
+/>
+       
+      
+         <p className={`mb-1 tex-sm flex items-center justify-between rounded-2xl mt-2 text-pink-500 border border-white shadow-lg bg-white p-2`}>
+         <BsFillFileEarmarkSpreadsheetFill /><p>Analytics from source</p>
+          </p>
+         <p className={`mb-1 tex-sm flex items-center justify-between rounded-2xl mt-2 text-pink-500 border border-white shadow-lg bg-white p-2`}>
+         <BsFillFileEarmarkSpreadsheetFill /><p>Analytics from source</p>
+          </p>
+        
+         </div>}
        </div>
         ))}
       </div>
